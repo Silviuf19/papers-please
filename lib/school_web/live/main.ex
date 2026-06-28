@@ -6,7 +6,8 @@ defmodule SchoolWeb.MainLive do
 
   import SchoolWeb.GameComponents
 
-  @lock_timeout 10_000
+  @lock_timeout 5_000
+  @meme_timeout 2_000
 
   @impl true
   def mount(_params, _session, socket) do
@@ -32,8 +33,12 @@ defmodule SchoolWeb.MainLive do
       |> assign(:sabotage_target, nil)
       |> assign(:score, 0)
       |> assign(:is_locked?, false)
+      |> assign(:is_flipped?, false)
+      |> assign(:show_meme?, false)
+      |> assign(:meme_id, 0)
       |> assign(:player_list, [])
 
+    # Process.send_after(self(), :hide_meme, @meme_timeout)
     {:ok, new_socket}
   end
 
@@ -105,6 +110,7 @@ defmodule SchoolWeb.MainLive do
     new_socket =
       socket
       |> assign(:package, package)
+      |> assign(:is_flipped?, false)
       |> push_event("reset-package-card", %{})
 
     {:noreply, new_socket}
@@ -161,13 +167,14 @@ defmodule SchoolWeb.MainLive do
   end
 
   def handle_info({:sabotage, :steal}, socket) do
-    {:noreply, socket}
+    {:noreply, show_meme(socket)}
   end
 
   def handle_info({:sabotage, :revert}, socket) do
     new_socket =
       socket
       |> assign(:is_flipped?, true)
+      |> show_meme()
 
     {:noreply, new_socket}
   end
@@ -176,6 +183,7 @@ defmodule SchoolWeb.MainLive do
     new_socket =
       socket
       |> assign(:is_locked?, true)
+      |> show_meme()
 
     Process.send_after(self(), :unlock, @lock_timeout)
     {:noreply, new_socket}
@@ -186,6 +194,21 @@ defmodule SchoolWeb.MainLive do
       socket |> assign(:is_locked?, false)
 
     {:noreply, new_socket}
+  end
+
+  def handle_info(:hide_meme, socket) do
+    new_socket =
+      socket |> assign(:show_meme?, false)
+
+    {:noreply, new_socket}
+  end
+
+  defp show_meme(socket) do
+    Process.send_after(self(), :hide_meme, @meme_timeout)
+
+    socket
+    |> assign(:show_meme?, true)
+    |> assign(:meme_id, socket.assigns.meme_id + 1)
   end
 
   defp validation(swipe_direction, expected, socket) do

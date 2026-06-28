@@ -38,6 +38,7 @@ defmodule SchoolWeb.GameComponents do
   attr :package, :map, required: true
   attr :timestamp, :integer, required: true
   attr :validation_result, :atom, required: true
+  attr :is_flipped?, :boolean, default: false
 
   def package_inspection_form(assigns) do
     ~H"""
@@ -61,7 +62,7 @@ defmodule SchoolWeb.GameComponents do
           <div></div>
       <% end %>
 
-      <div class="package-card">
+      <div class={["package-card", @is_flipped? && "package-card--flipped"]}>
         <div class="card-header">
           <div class="card-title-group">
             <div class="card-title">Package Inspection Form</div>
@@ -287,6 +288,38 @@ defmodule SchoolWeb.GameComponents do
           Another inspector has sabotaged your workstation. Sit tight.
         </div>
       </div>
+    </div>
+    """
+  end
+
+  @meme_gifs [
+    "https://media.giphy.com/media/l0HlvtIPzPdt2usKs/giphy.gif",
+    "https://media.giphy.com/media/3o7TKSjRrfIPjeiVyM/giphy.gif",
+    "https://media.giphy.com/media/xT0xezQGU5xCDJuCPe/giphy.gif",
+    "https://media.giphy.com/media/3oEjI6SIIHBdRxXI40/giphy.gif",
+    "https://media.giphy.com/media/13HgwGsXF0aiGY/giphy.gif",
+    "https://media.giphy.com/media/ASd0Ukj0y3qMM/giphy.gif"
+  ]
+
+  attr :meme_id, :integer, default: 0
+
+  def meme_overlay(assigns) do
+    assigns = assign_new(assigns, :meme, fn -> Enum.random(@meme_gifs) end)
+
+    ~H"""
+    <div
+      id={"meme-overlay-#{@meme_id}"}
+      phx-hook="MemeSound"
+      style="position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:10000;display:flex;flex-direction:column;align-items:center;justify-content:center;animation:meme-pop 0.3s ease;"
+    >
+      <div style="font-size:2.4rem;font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:1rem;text-shadow:2px 2px 0 #c0392b;">
+        You got sabotaged! 💀
+      </div>
+      <img
+        src={@meme}
+        alt="sabotage meme"
+        style="max-width:420px;max-height:55vh;border:6px solid #fff;border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,0.6);"
+      />
     </div>
     """
   end

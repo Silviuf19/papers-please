@@ -25,11 +25,39 @@ import {LiveSocket} from "phoenix_live_view"
 import {hooks as colocatedHooks} from "phoenix-colocated/school"
 import topbar from "../vendor/topbar"
 
+// Plays a comedic "sad trombone" style sound when a sabotage meme appears.
+const MemeSound = {
+  mounted() {
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)()
+      const notes = [392.0, 369.99, 349.23, 329.63] // descending wah-wah-wah-waaah
+      let t = ctx.currentTime
+      notes.forEach((freq, i) => {
+        const osc = ctx.createOscillator()
+        const gain = ctx.createGain()
+        osc.type = "sawtooth"
+        osc.frequency.value = freq
+        const dur = i === notes.length - 1 ? 0.6 : 0.18
+        gain.gain.setValueAtTime(0.0001, t)
+        gain.gain.exponentialRampToValueAtTime(0.25, t + 0.02)
+        gain.gain.exponentialRampToValueAtTime(0.0001, t + dur)
+        osc.connect(gain)
+        gain.connect(ctx.destination)
+        osc.start(t)
+        osc.stop(t + dur)
+        t += dur
+      })
+    } catch (e) {
+      // Audio not available (e.g. autoplay blocked); fail silently.
+    }
+  }
+}
+
 const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 const liveSocket = new LiveSocket("/live", Socket, {
   longPollFallbackMs: 2500,
   params: {_csrf_token: csrfToken},
-  hooks: {...colocatedHooks},
+  hooks: {...colocatedHooks, MemeSound},
 })
 
 // Show progress bar on live navigation and form submits

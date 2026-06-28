@@ -20,6 +20,7 @@
         package={@package}
         timestamp={@timestamp}
         validation_result={@validation_result}
+        is_flipped?={@is_flipped?}
       />
     </section>
   <% else %>
@@ -46,3 +47,4 @@
 
 <.match_end_overlay :if={@game_state == :ended} player_list={@player_list} />
 <.locked_overlay :if={@is_locked?} />
+<.meme_overlay :if={@show_meme?} meme_id={@meme_id} />
