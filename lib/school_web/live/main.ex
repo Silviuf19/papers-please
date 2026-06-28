@@ -133,7 +133,7 @@ defmodule SchoolWeb.MainLive do
   defp validation(swipe_direction, expected, socket) do
     package = socket.assigns.package
 
-    {updated_player, decision, validation_msg} =
+    {updated_player, decision, validation_msg, sabotages} =
       State.update_player_score(self(), package, expected)
 
     new_socket =
@@ -141,6 +141,7 @@ defmodule SchoolWeb.MainLive do
       |> assign(:validation_result, decision)
       |> assign(:validation_msg, validation_msg)
       |> assign(:local_player, updated_player)
+      |> assign(:available_sabotages, sabotages)
       |> assign(:score, updated_player.score)
       |> push_event(swipe_direction, %{})
 

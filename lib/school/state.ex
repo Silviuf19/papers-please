@@ -93,6 +93,13 @@ defmodule School.State do
         do: :correct,
         else: :incorrect
 
+    new_strike =
+      if decision == :correct do
+        player.strike + 1
+      else
+        0
+      end
+
     score_delta =
       if decision == :correct,
         do: 1,
@@ -100,7 +107,16 @@ defmodule School.State do
 
     new_score = max(player.score + score_delta, 0)
 
-    updated_player = Map.put(player, :score, new_score)
+    {sabotages, new_strike} =
+      if new_strike >= 3 do
+        sabotage_type = Sabotage.generate_sabotage()
+        {Map.put(player.sabotages, sabotage_type, player.sabotages[sabotage_type] + 1), 0}
+      else
+        {player.sabotages, new_strike}
+      end
+
+    IO.inspect(sabotages)
+    updated_player = %{player | score: new_score, strike: new_strike, sabotages: sabotages}
 
     updated_player_list = [updated_player | remaining_players]
 
@@ -112,7 +128,7 @@ defmodule School.State do
 
     new_state = Map.put(state, :players, updated_player_list)
 
-    {:reply, {updated_player, decision, validation_msg}, new_state}
+    {:reply, {updated_player, decision, validation_msg, sabotages}, new_state}
   end
 
   @impl true

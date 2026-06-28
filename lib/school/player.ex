@@ -9,5 +9,7 @@ defmodule School.Player do
   defstruct name: nil,
             score: 0,
             pid: nil,
-            ready?: false
+            ready?: false,
+            sabotages: %{steal: 0, lock: 0, revert: 0},
+            strike: 0
 end
