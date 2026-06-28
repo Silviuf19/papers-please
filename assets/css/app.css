@@ -476,9 +476,14 @@
       font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em;
       color: #fff; background: #c0392b;
       border: none; border-radius: 6px; cursor: pointer;
-      transition: background 0.15s ease;
+      transition: background 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
     }
     .sabotage-btn:hover { background: #a93226; }
+    .sabotage-btn:active {
+      background: #7d2218;
+      transform: scale(0.9);
+      box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.4);
+    }
     .sabotage-btn--active { background: #a93226; outline: 2px solid #e74c3c; }
 
     .sabotage-item { justify-content: flex-start; gap: 8px; }

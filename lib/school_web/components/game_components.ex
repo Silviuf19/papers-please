@@ -222,6 +222,7 @@ defmodule SchoolWeb.GameComponents do
   attr :player_list, :list, required: true
   attr :has_sabotages, :boolean, default: false
   attr :sabotage_target, :string, default: nil
+  attr :local_player, :map, default: nil
 
   def leaderboard(assigns) do
     ~H"""
@@ -238,7 +239,7 @@ defmodule SchoolWeb.GameComponents do
           </div>
           <div class="lb-player-score">{player.score}</div>
           <button
-            :if={@has_sabotages}
+            :if={@has_sabotages && (@local_player == nil || player.pid != @local_player.pid)}
             type="button"
             class={["sabotage-btn", @sabotage_target == player.name && "sabotage-btn--active"]}
             phx-click="toggle_sabotage_menu"
