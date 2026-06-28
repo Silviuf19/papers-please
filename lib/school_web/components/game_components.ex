@@ -187,6 +187,26 @@ defmodule SchoolWeb.GameComponents do
     """
   end
 
+  attr :sabotage_descriptions, :list, required: true
+
+  def postal_sabotages(assigns) do
+    ~H"""
+    <div class="rules-reference sabotages-reference">
+      <div class="rules-header">
+        <span class="rules-title">Sabotages</span>
+      </div>
+
+      <%= for {desc, index} <- Enum.with_index(@sabotage_descriptions) do %>
+        <div class="rules-list">
+          <div class="rule-item">
+            <span class="rule-number">{index + 1}</span><span>{desc}</span>
+          </div>
+        </div>
+      <% end %>
+    </div>
+    """
+  end
+
   attr :player_list, :list, required: true
 
   def leaderboard(assigns) do

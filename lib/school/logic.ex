@@ -1,6 +1,12 @@
 defmodule School.Logic do
   alias School.Package
 
+  @desc_sabotages %{
+    steal: "Steal 5 points from another inspector.",
+    lock: "Freeze a rival's screen for 15 seconds.",
+    reverse: "Flip a rival's package card 180° for 15 seconds."
+  }
+
   @desc_rules %{
     rule1: "Letters must weigh under 500g.",
     rule2: "International packages require a customs form.",
@@ -66,6 +72,20 @@ defmodule School.Logic do
       desc = Map.get(@desc_rules, rule)
       [desc | acc]
     end)
+  end
+
+  @available_sabotages %{
+    steal: 1,
+    lock: 2,
+    reverse: 3
+  }
+
+  @type sabotage :: :steal | :lock | :reverse
+  @spec descriptions_by_sabotages() :: list(String.t())
+  def descriptions_by_sabotages do
+    @available_sabotages
+    |> Enum.sort_by(fn {_sabotage, number} -> number end)
+    |> Enum.map(fn {sabotage, _number} -> Map.get(@desc_sabotages, sabotage) end)
   end
 
   defp validate_rule1(%{type: :letter, weight: weight}) do

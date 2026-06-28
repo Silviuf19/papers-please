@@ -24,6 +24,7 @@ defmodule SchoolWeb.MainLive do
       |> assign(:game_state, :waiting)
       |> assign(:active_rules, active_rules)
       |> assign(:rule_descriptions, rule_descriptions)
+      |> assign(:sabotage_descriptions, Logic.descriptions_by_sabotages())
       |> assign(:score, 0)
       |> assign(:player_list, [])
 
