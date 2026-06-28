@@ -166,8 +166,8 @@ defmodule SchoolWeb.MainLive do
     {:noreply, new_socket}
   end
 
-  def handle_info({:sabotage, :steal}, socket) do
-    updated_player = State.steal_points(self())
+  def handle_info({:sabotage, :steal, sender_pid}, socket) do
+    updated_player = State.steal_points(self(), sender_pid)
 
     new_socket =
       socket
@@ -178,7 +178,7 @@ defmodule SchoolWeb.MainLive do
     {:noreply, new_socket}
   end
 
-  def handle_info({:sabotage, :revert}, socket) do
+  def handle_info({:sabotage, :revert, _sender_pid}, socket) do
     new_socket =
       socket
       |> assign(:is_flipped?, true)
@@ -187,7 +187,7 @@ defmodule SchoolWeb.MainLive do
     {:noreply, new_socket}
   end
 
-  def handle_info({:sabotage, :lock}, socket) do
+  def handle_info({:sabotage, :lock, _sender_pid}, socket) do
     new_socket =
       socket
       |> assign(:is_locked?, true)
@@ -202,6 +202,10 @@ defmodule SchoolWeb.MainLive do
       socket |> assign(:is_locked?, false)
 
     {:noreply, new_socket}
+  end
+
+  def handle_info({:score_updated, new_score}, socket) do
+    {:noreply, assign(socket, :score, new_score)}
   end
 
   def handle_info(:hide_meme, socket) do

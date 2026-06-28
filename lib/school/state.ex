@@ -48,8 +48,8 @@ defmodule School.State do
     GenServer.call(__MODULE__, :get_active_rules)
   end
 
-  def steal_points(pid) do
-    GenServer.call(__MODULE__, {:steal_points, pid})
+  def steal_points(victim_pid, attacker_pid) do
+    GenServer.call(__MODULE__, {:steal_points, victim_pid, attacker_pid})
   end
 
   def update_player_score(pid, package, expected) do
@@ -149,7 +149,7 @@ defmodule School.State do
     new_sabotages = Map.update!(sender.sabotages, sabotage_type, &max(&1 - 1, 0))
     new_state = Map.put(state, :players, [%{sender | sabotages: new_sabotages}, target | rest])
 
-    send(target.pid, {:sabotage, sabotage_type})
+    send(target.pid, {:sabotage, sabotage_type, sender_pid})
 
     {:reply, new_sabotages, new_state}
   end
@@ -175,11 +175,16 @@ defmodule School.State do
     {:reply, new_player, new_state}
   end
 
-  def handle_call({:steal_points, pid}, _from, state) do
-    {[player], rest} = Enum.split_with(state.players, fn p -> p.pid == pid end)
+  @impl true
+  def handle_call({:steal_points, victim_pid, attacker_pid}, _from, state) do
+    {[victim], remaining} = Enum.split_with(state.players, fn p -> p.pid == victim_pid end)
+    {[attacker], rest} = Enum.split_with(remaining, fn p -> p.pid == attacker_pid end)
 
-    updated_player = %{player | score: max(player.score - 2, 0)}
-    updated_list = [updated_player | rest]
+    stolen = min(victim.score, 2)
+    updated_victim = %{victim | score: victim.score - stolen}
+    updated_attacker = %{attacker | score: attacker.score + stolen}
+
+    updated_list = [updated_victim, updated_attacker | rest]
     new_state = Map.put(state, :players, updated_list)
 
     Phoenix.PubSub.broadcast(
@@ -188,7 +193,10 @@ defmodule School.State do
       {:update_player_list, sort_by_score(updated_list)}
     )
 
-    {:reply, updated_player, new_state}
+    send(victim_pid, {:score_updated, updated_victim.score})
+    send(attacker_pid, {:score_updated, updated_attacker.score})
+
+    {:reply, updated_victim, new_state}
   end
 
   @impl true

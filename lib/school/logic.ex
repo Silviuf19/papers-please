@@ -2,7 +2,7 @@ defmodule School.Logic do
   alias School.Package
 
   @desc_sabotages %{
-    steal: "Steal 5 points from another inspector.",
+    steal: "Steal 2 points from another inspector.",
     lock: "Freeze a rival's screen for 15 seconds.",
     reverse: "Flip a rival's package card 180° for 15 seconds."
   }
