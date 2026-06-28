@@ -241,7 +241,7 @@ defmodule SchoolWeb.GameComponents do
             type="button"
             class={["sabotage-btn", @sabotage_target == player.name && "sabotage-btn--active"]}
             phx-click="toggle_sabotage_menu"
-            phx-value-victim={player.name}
+            phx-value-victim={player.pid |> :erlang.pid_to_list() |> List.to_string()}
           >
             Sabotage
           </button>

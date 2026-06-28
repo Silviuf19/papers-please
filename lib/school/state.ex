@@ -52,8 +52,8 @@ defmodule School.State do
     GenServer.call(__MODULE__, {:update_player_score, pid, package, expected})
   end
 
-  def use_sabotage(pid, sabotage_type) do
-    GenServer.call(__MODULE__, {:use_sabotage, pid, sabotage_type})
+  def use_sabotage(target_pid, sabotage_type) do
+    GenServer.call(__MODULE__, {:use_sabotage, target_pid, sabotage_type})
   end
 
   @impl true
@@ -136,17 +136,17 @@ defmodule School.State do
   end
 
   @impl true
-  def handle_call({:use_sabotage, pid, sabotage_type}, _from, state) do
-    {[player], remaining_players} =
-      Enum.split_with(state.players, fn player -> player.pid == pid end)
+  def handle_call({:use_sabotage, target_pid, sabotage_type}, {sender_pid, _}, state) do
+    {[sender], remaining} =
+      Enum.split_with(state.players, fn p -> p.pid == sender_pid end)
 
-    current_count = Map.get(player.sabotages, sabotage_type, 0)
-    new_count = max(current_count - 1, 0)
+    {[target], rest} =
+      Enum.split_with(remaining, fn p -> p.pid == target_pid end)
 
-    new_sabotages =  Map.put(player.sabotages, sabotage_type, new_count)
+    new_sabotages = Map.update!(sender.sabotages, sabotage_type, &max(&1 - 1, 0))
+    new_state = Map.put(state, :players, [%{sender | sabotages: new_sabotages}, target | rest])
 
-    updated_player = %{player | sabotages: new_sabotages}
-    new_state = Map.put(state, :players, [updated_player | remaining_players])
+    send(target.pid, {:sabotage, sabotage_type})
 
     {:reply, new_sabotages, new_state}
   end

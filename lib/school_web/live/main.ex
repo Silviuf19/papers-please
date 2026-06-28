@@ -31,7 +31,7 @@ defmodule SchoolWeb.MainLive do
       |> assign(:sabotage_descriptions, Logic.descriptions_by_sabotages())
       |> assign(:sabotage_target, nil)
       |> assign(:score, 0)
-      |> assign(:is_locked?, true)
+      |> assign(:is_locked?, false)
       |> assign(:player_list, [])
 
     {:ok, new_socket}
@@ -61,15 +61,20 @@ defmodule SchoolWeb.MainLive do
   end
 
   @impl true
-  def handle_event("toggle_sabotage_menu", %{"victim" => name}, socket) do
-    new_target = if socket.assigns.sabotage_target == name, do: nil, else: name
+  def handle_event("toggle_sabotage_menu", %{"victim" => pid}, socket) do
+    new_target = if socket.assigns.sabotage_target == pid, do: nil, else: pid
     {:noreply, assign(socket, :sabotage_target, new_target)}
   end
 
   @impl true
-  def handle_event("choose_sabotage", %{"victim" => _victim, "sabotage" => sabotage_str}, socket) do
+  def handle_event(
+        "choose_sabotage",
+        %{"victim" => victim_str, "sabotage" => sabotage_str},
+        socket
+      ) do
     sabotage = String.to_existing_atom(sabotage_str)
-    new_sabotages = State.use_sabotage(self(), sabotage)
+    target_pid = victim_str |> String.to_charlist() |> :erlang.list_to_pid()
+    new_sabotages = State.use_sabotage(target_pid, sabotage)
 
     new_socket =
       socket
@@ -155,7 +160,19 @@ defmodule SchoolWeb.MainLive do
     {:noreply, new_socket}
   end
 
-  def handle_info({:sabotage, :lock_player}, socket) do
+  def handle_info({:sabotage, :steal}, socket) do
+    {:noreply, socket}
+  end
+
+  def handle_info({:sabotage, :revert}, socket) do
+    new_socket =
+      socket
+      |> assign(:is_flipped?, true)
+
+    {:noreply, new_socket}
+  end
+
+  def handle_info({:sabotage, :lock}, socket) do
     new_socket =
       socket
       |> assign(:is_locked?, true)
