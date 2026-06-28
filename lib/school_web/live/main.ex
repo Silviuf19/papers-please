@@ -65,13 +65,7 @@ defmodule SchoolWeb.MainLive do
   @impl true
   def handle_event("choose_sabotage", %{"victim" => _victim, "sabotage" => sabotage_str}, socket) do
     sabotage = String.to_existing_atom(sabotage_str)
-    sabotages = socket.assigns.available_sabotages
-    new_count = Map.get(sabotages, sabotage, 0) - 1
-
-    new_sabotages =
-      if new_count <= 0,
-        do: Map.delete(sabotages, sabotage),
-        else: Map.put(sabotages, sabotage, new_count)
+    new_sabotages = State.use_sabotage(self(), sabotage)
 
     new_socket =
       socket
