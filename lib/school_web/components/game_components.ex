@@ -275,6 +275,22 @@ defmodule SchoolWeb.GameComponents do
     """
   end
 
+  def locked_overlay(assigns) do
+    ~H"""
+    <div style="position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:9999;cursor:not-allowed;display:flex;align-items:center;justify-content:center;">
+      <div style="text-align:center;color:white;user-select:none;">
+        <div style="font-size:4rem;">🔒</div>
+        <div style="font-size:1.8rem;font-weight:bold;margin-top:0.5rem;letter-spacing:0.05em;">
+          Station Locked
+        </div>
+        <div style="font-size:1rem;margin-top:0.75rem;opacity:0.7;max-width:280px;">
+          Another inspector has sabotaged your workstation. Sit tight.
+        </div>
+      </div>
+    </div>
+    """
+  end
+
   def capitalise(term) do
     String.capitalize("#{term}")
   end

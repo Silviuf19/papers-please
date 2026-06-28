@@ -6,6 +6,8 @@ defmodule SchoolWeb.MainLive do
 
   import SchoolWeb.GameComponents
 
+  @lock_timeout 10_000
+
   @impl true
   def mount(_params, _session, socket) do
     package = Logic.generate_package()
@@ -25,9 +27,11 @@ defmodule SchoolWeb.MainLive do
       |> assign(:active_rules, active_rules)
       |> assign(:rule_descriptions, rule_descriptions)
       |> assign(:available_sabotages, %{steal: 0, lock: 0, revert: 0})
+      |> assign(:selected_sabotage, nil)
       |> assign(:sabotage_descriptions, Logic.descriptions_by_sabotages())
       |> assign(:sabotage_target, nil)
       |> assign(:score, 0)
+      |> assign(:is_locked?, true)
       |> assign(:player_list, [])
 
     {:ok, new_socket}
@@ -147,6 +151,22 @@ defmodule SchoolWeb.MainLive do
     new_socket =
       socket
       |> assign(:player_list, updated_player_list)
+
+    {:noreply, new_socket}
+  end
+
+  def handle_info({:sabotage, :lock_player}, socket) do
+    new_socket =
+      socket
+      |> assign(:is_locked?, true)
+
+    Process.send_after(self(), :unlock, @lock_timeout)
+    {:noreply, new_socket}
+  end
+
+  def handle_info(:unlock, socket) do
+    new_socket =
+      socket |> assign(:is_locked?, false)
 
     {:noreply, new_socket}
   end
