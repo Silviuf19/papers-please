@@ -123,7 +123,6 @@ defmodule School.State do
         {player.sabotages, new_strike}
       end
 
-    IO.inspect(sabotages)
     updated_player = %{player | score: new_score, strike: new_strike, sabotages: sabotages}
 
     updated_player_list = [updated_player | remaining_players]
