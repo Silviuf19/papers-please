@@ -48,6 +48,10 @@ defmodule School.State do
     GenServer.call(__MODULE__, :get_active_rules)
   end
 
+  def steal_points(pid) do
+    GenServer.call(__MODULE__, {:steal_points, pid})
+  end
+
   def update_player_score(pid, package, expected) do
     GenServer.call(__MODULE__, {:update_player_score, pid, package, expected})
   end
@@ -170,6 +174,22 @@ defmodule School.State do
     )
 
     {:reply, new_player, new_state}
+  end
+
+  def handle_call({:steal_points, pid}, _from, state) do
+    {[player], rest} = Enum.split_with(state.players, fn p -> p.pid == pid end)
+
+    updated_player = %{player | score: max(player.score - 2, 0)}
+    updated_list = [updated_player | rest]
+    new_state = Map.put(state, :players, updated_list)
+
+    Phoenix.PubSub.broadcast(
+      School.PubSub,
+      "game_room",
+      {:update_player_list, sort_by_score(updated_list)}
+    )
+
+    {:reply, updated_player, new_state}
   end
 
   @impl true

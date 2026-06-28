@@ -167,7 +167,15 @@ defmodule SchoolWeb.MainLive do
   end
 
   def handle_info({:sabotage, :steal}, socket) do
-    {:noreply, show_meme(socket)}
+    updated_player = State.steal_points(self())
+
+    new_socket =
+      socket
+      |> assign(:local_player, updated_player)
+      |> assign(:score, updated_player.score)
+      |> show_meme()
+
+    {:noreply, new_socket}
   end
 
   def handle_info({:sabotage, :revert}, socket) do
