@@ -48,6 +48,10 @@ defmodule School.State do
     GenServer.call(__MODULE__, :get_active_rules)
   end
 
+  def get_player_name(pid) do
+    GenServer.call(__MODULE__, {:get_player_name, pid})
+  end
+
   def steal_points(victim_pid, attacker_pid) do
     GenServer.call(__MODULE__, {:steal_points, victim_pid, attacker_pid})
   end
@@ -86,6 +90,12 @@ defmodule School.State do
   @impl true
   def handle_call(:get_active_rules, _from, state) do
     {:reply, state.active_rules, state}
+  end
+
+  @impl true
+  def handle_call({:get_player_name, pid}, _from, state) do
+    player = Enum.find(state.players, fn p -> p.pid == pid end)
+    {:reply, player.name, state}
   end
 
   @impl true

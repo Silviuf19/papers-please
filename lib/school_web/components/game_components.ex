@@ -303,6 +303,7 @@ defmodule SchoolWeb.GameComponents do
   ]
 
   attr :meme_id, :integer, default: 0
+  attr :attacker_name, :string, required: true
 
   def meme_overlay(assigns) do
     assigns = assign_new(assigns, :meme, fn -> Enum.random(@meme_gifs) end)
@@ -313,8 +314,11 @@ defmodule SchoolWeb.GameComponents do
       phx-hook="MemeSound"
       style="position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:10000;display:flex;flex-direction:column;align-items:center;justify-content:center;animation:meme-pop 0.3s ease;"
     >
-      <div style="font-size:2.4rem;font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:1rem;text-shadow:2px 2px 0 #c0392b;">
+      <div style="font-size:2.4rem;font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.5rem;text-shadow:2px 2px 0 #c0392b;">
         You got sabotaged! 💀
+      </div>
+      <div style="font-size:1.1rem;color:#f39c12;font-weight:600;margin-bottom:1rem;">
+        by Inspector {@attacker_name}
       </div>
       <img
         src={@meme}

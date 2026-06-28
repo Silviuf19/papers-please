@@ -35,6 +35,7 @@ defmodule SchoolWeb.MainLive do
       |> assign(:is_locked?, false)
       |> assign(:is_flipped?, false)
       |> assign(:show_meme?, false)
+      |> assign(:attacker_name, nil)
       |> assign(:meme_id, 0)
       |> assign(:player_list, [])
 
@@ -173,25 +174,25 @@ defmodule SchoolWeb.MainLive do
       socket
       |> assign(:local_player, updated_player)
       |> assign(:score, updated_player.score)
-      |> show_meme()
+      |> show_meme(sender_pid)
 
     {:noreply, new_socket}
   end
 
-  def handle_info({:sabotage, :revert, _sender_pid}, socket) do
+  def handle_info({:sabotage, :revert, sender_pid}, socket) do
     new_socket =
       socket
       |> assign(:is_flipped?, true)
-      |> show_meme()
+      |> show_meme(sender_pid)
 
     {:noreply, new_socket}
   end
 
-  def handle_info({:sabotage, :lock, _sender_pid}, socket) do
+  def handle_info({:sabotage, :lock, sender_pid}, socket) do
     new_socket =
       socket
       |> assign(:is_locked?, true)
-      |> show_meme()
+      |> show_meme(sender_pid)
 
     Process.send_after(self(), :unlock, @lock_timeout)
     {:noreply, new_socket}
@@ -215,12 +216,14 @@ defmodule SchoolWeb.MainLive do
     {:noreply, new_socket}
   end
 
-  defp show_meme(socket) do
+  defp show_meme(socket, attacker_pid) do
+    attacker_name = State.get_player_name(attacker_pid)
     Process.send_after(self(), :hide_meme, @meme_timeout)
 
     socket
     |> assign(:show_meme?, true)
     |> assign(:meme_id, socket.assigns.meme_id + 1)
+    |> assign(:attacker_name, attacker_name)
   end
 
   defp validation(swipe_direction, expected, socket) do

@@ -48,4 +48,4 @@
 
 <.match_end_overlay :if={@game_state == :ended} player_list={@player_list} />
 <.locked_overlay :if={@is_locked?} />
-<.meme_overlay :if={@show_meme?} meme_id={@meme_id} />
+<.meme_overlay :if={@show_meme?} meme_id={@meme_id} attacker_name={@attacker_name} />
