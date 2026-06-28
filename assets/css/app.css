@@ -457,6 +457,41 @@
     .rank-3 { background: #fce8e0; color: #c0734a; border-radius: 50%; font-weight: 700; }
 
     .lb-player-info { flex: 1; min-width: 0; }
+    .lb-player-row { display: flex; align-items: center; gap: 10px; }
+
+    .sabotage-btn {
+      flex-shrink: 0; padding: 4px 10px;
+      font-family: 'DM Mono', monospace; font-size: 10px;
+      font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em;
+      color: #fff; background: #c0392b;
+      border: none; border-radius: 6px; cursor: pointer;
+      transition: background 0.15s ease;
+    }
+    .sabotage-btn:hover { background: #a93226; }
+    .sabotage-btn--active { background: #a93226; outline: 2px solid #e74c3c; }
+
+    .sabotage-item { justify-content: flex-start; gap: 8px; }
+
+    .sabotage-item--empty { opacity: 0.4; }
+
+    .sabotage-item-desc { flex: 1; }
+
+    .sabotage-item-count {
+      font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 700;
+      color: #c0392b; min-width: 16px; text-align: right;
+    }
+    .sabotage-item--empty .sabotage-item-count { color: var(--ink-muted); }
+
+    .sabotage-item { transition: background 0.15s ease, transform 0.1s ease; }
+    .sabotage-item:not(.sabotage-item--empty) { cursor: pointer; }
+    .sabotage-item:not(.sabotage-item--empty):hover {
+      background: rgba(192, 57, 43, 0.08);
+      transform: translateX(3px);
+    }
+    .sabotage-item:not(.sabotage-item--empty):active {
+      background: rgba(192, 57, 43, 0.18);
+      transform: translateX(3px) scale(0.98);
+    }
 
     .lb-player-name {
       font-size: 12px; font-weight: 600; color: var(--ink);

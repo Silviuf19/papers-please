@@ -30,10 +30,18 @@
   <.postal_regulations rule_descriptions={@rule_descriptions} />
 
 <!-- COLUMN 3: SABOTAGES -->
-  <.postal_sabotages sabotage_descriptions={@sabotage_descriptions} />
+  <.postal_sabotages
+    sabotage_descriptions={@sabotage_descriptions}
+    available_sabotages={@available_sabotages}
+    sabotage_target={@sabotage_target}
+  />
 
 <!-- COLUMN 4: LEADERBOARD -->
-  <.leaderboard player_list={@player_list} />
+  <.leaderboard
+    player_list={@player_list}
+    has_sabotages={Enum.any?(@available_sabotages, fn {_, v} -> v > 0 end)}
+    sabotage_target={@sabotage_target}
+  />
 </main>
 
 <.match_end_overlay :if={@game_state == :ended} player_list={@player_list} />

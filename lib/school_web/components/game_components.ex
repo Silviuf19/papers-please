@@ -188,18 +188,29 @@ defmodule SchoolWeb.GameComponents do
   end
 
   attr :sabotage_descriptions, :list, required: true
+  attr :available_sabotages, :map, default: %{}
+  attr :sabotage_target, :string, default: nil
 
   def postal_sabotages(assigns) do
     ~H"""
     <div class="rules-reference sabotages-reference">
       <div class="rules-header">
-        <span class="rules-title">Sabotages</span>
+        <span class="rules-title">Available Sabotages</span>
       </div>
 
       <%= for {desc, index} <- Enum.with_index(@sabotage_descriptions) do %>
+        <% sabotage = sabotage_atom(index) %>
+        <% count = Map.get(@available_sabotages, sabotage, 0) %>
         <div class="rules-list">
-          <div class="rule-item">
-            <span class="rule-number">{index + 1}</span><span>{desc}</span>
+          <div
+            class={["rule-item", "sabotage-item", count == 0 && "sabotage-item--empty"]}
+            phx-click={@sabotage_target && count > 0 && "choose_sabotage"}
+            phx-value-victim={@sabotage_target}
+            phx-value-sabotage={sabotage}
+          >
+            <span class="rule-number">{index + 1}</span>
+            <span class="sabotage-item-desc">{desc}</span>
+            <span class="sabotage-item-count">{count}</span>
           </div>
         </div>
       <% end %>
@@ -208,6 +219,8 @@ defmodule SchoolWeb.GameComponents do
   end
 
   attr :player_list, :list, required: true
+  attr :has_sabotages, :boolean, default: false
+  attr :sabotage_target, :string, default: nil
 
   def leaderboard(assigns) do
     ~H"""
@@ -223,11 +236,24 @@ defmodule SchoolWeb.GameComponents do
             <div class="lb-player-name">{player.name}</div>
           </div>
           <div class="lb-player-score">{player.score}</div>
+          <button
+            :if={@has_sabotages}
+            type="button"
+            class={["sabotage-btn", @sabotage_target == player.name && "sabotage-btn--active"]}
+            phx-click="toggle_sabotage_menu"
+            phx-value-victim={player.name}
+          >
+            Sabotage
+          </button>
         </li>
       </ul>
     </div>
     """
   end
+
+  defp sabotage_atom(0), do: :steal
+  defp sabotage_atom(1), do: :lock
+  defp sabotage_atom(2), do: :revert
 
   attr :player_list, :list, required: true
 

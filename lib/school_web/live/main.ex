@@ -26,6 +26,7 @@ defmodule SchoolWeb.MainLive do
       |> assign(:rule_descriptions, rule_descriptions)
       |> assign(:available_sabotages, %{steal: 0, lock: 0, revert: 0})
       |> assign(:sabotage_descriptions, Logic.descriptions_by_sabotages())
+      |> assign(:sabotage_target, nil)
       |> assign(:score, 0)
       |> assign(:player_list, [])
 
@@ -51,6 +52,31 @@ defmodule SchoolWeb.MainLive do
     new_socket =
       socket
       |> assign(:local_player, updated_local_player)
+
+    {:noreply, new_socket}
+  end
+
+  @impl true
+  def handle_event("toggle_sabotage_menu", %{"victim" => name}, socket) do
+    new_target = if socket.assigns.sabotage_target == name, do: nil, else: name
+    {:noreply, assign(socket, :sabotage_target, new_target)}
+  end
+
+  @impl true
+  def handle_event("choose_sabotage", %{"victim" => _victim, "sabotage" => sabotage_str}, socket) do
+    sabotage = String.to_existing_atom(sabotage_str)
+    sabotages = socket.assigns.available_sabotages
+    new_count = Map.get(sabotages, sabotage, 0) - 1
+
+    new_sabotages =
+      if new_count <= 0,
+        do: Map.delete(sabotages, sabotage),
+        else: Map.put(sabotages, sabotage, new_count)
+
+    new_socket =
+      socket
+      |> assign(:available_sabotages, new_sabotages)
+      |> assign(:sabotage_target, nil)
 
     {:noreply, new_socket}
   end
